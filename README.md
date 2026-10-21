@@ -1,19 +1,19 @@
-# ghostapi
+# apimirage
 
 LLMs use deprecated APIs up to 38% of the time — and ruff can't catch it.
 
-`ghostapi` is a tiny static checker that finds **hallucinated** and
+`apimirage` is a tiny static checker that finds **hallucinated** and
 **deprecated** API usage in Python code. It parses your file with `ast`,
 collects every call made through an imported name, then verifies each one
 **for real** with `importlib` + `inspect.signature`. Nothing is ever executed —
 imports are only used for existence checks.
 
 ```bash
-$ ghostapi app.py
+$ apimirage app.py
 app.py:12: [ghost-api] requests.post_json -- attribute does not exist on the real module -- possibly hallucinated
 app.py:27: [ghost-param] json.dumps(pretty=...) -- keyword argument 'pretty' is not accepted by the real signature
 app.py:41: [deprecated] asyncio.coroutine -- API is deprecated: marked with __deprecated__ (PEP 702)
-ghostapi: 3 findings in 1 file
+apimirage: 3 findings in 1 file
 ```
 
 Zero dependencies. Python standard library only (`ast` + `importlib` + `inspect`).
@@ -22,23 +22,23 @@ Everything stays local.
 ## Install
 
 ```bash
-pip install ghostapi
+pip install apimirage
 ```
 
 Or from source:
 
 ```bash
-git clone https://github.com/hahahahahahahahah6/ghostapi
-cd ghostapi
+git clone https://github.com/hahahahahahahahah6/apimirage
+cd apimirage
 pip install .
 ```
 
 ## Usage
 
 ```bash
-ghostapi file.py [more_files.py ...]
-ghostapi -f json src/ --quiet
-ghostapi --version
+apimirage file.py [more_files.py ...]
+apimirage -f json src/ --quiet
+apimirage --version
 ```
 
 Exit codes: `0` = clean, `1` = findings, `2` = usage error (missing file,
@@ -57,7 +57,7 @@ Finding kinds:
 It also works as a library:
 
 ```python
-from ghostapi import check_file
+from apimirage import check_file
 
 result = check_file("app.py")
 for finding in result.findings:
@@ -73,17 +73,17 @@ AI-generated code:
 
 1. **"Does this API actually exist?"** — An LLM can invent a perfectly
    plausible name (`requests.post_json`, `pd.read_excel_sheets`) that no rule
-   list contains. Ruff sees a valid-looking call and stays silent. `ghostapi`
+   list contains. Ruff sees a valid-looking call and stays silent. `apimirage`
    really imports the module and checks the attribute, so a hallucination is
    caught no matter how convincing it looks.
 2. **"Is this real API already deprecated?"** — Deprecation is a property of the
    installed library version, not of your source text. A rule engine would need
-   a constantly updated database of every library's deprecations. `ghostapi`
+   a constantly updated database of every library's deprecations. `apimirage`
    reads the deprecation signals off the live objects themselves
    (`__deprecated__`, deprecation docstrings), so it tracks whatever you have
    installed.
 
-The trade-off is deliberate: `ghostapi` only verifies names that are statically
+The trade-off is deliberate: `apimirage` only verifies names that are statically
 resolvable through imports, and importing a module does run its top-level code
 (it never *calls* anything). Dynamic `getattr`, monkeypatching, and
 version-specific APIs can produce false negatives or positives — see
@@ -95,7 +95,7 @@ Limitations below.
   (`getattr(mod, name)`) and monkeypatched attributes are invisible to it.
 - An API that exists in your installed version but not in your deployment
   target (or vice versa) will be judged against what's installed here.
-- Importing a module executes its top-level code. `ghostapi` never calls your
+- Importing a module executes its top-level code. `apimirage` never calls your
   functions, but a module with heavy import-time side effects will run them.
 - `from x import *` and unresolvable local names are skipped, not flagged.
 
