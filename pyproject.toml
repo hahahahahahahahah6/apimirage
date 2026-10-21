@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ghostapi"
+name = "apimirage"
 version = "0.1.0"
 description = "Catch hallucinated and deprecated API usage: AST scan plus real importlib existence checks"
 readme = "README.md"
@@ -20,10 +20,10 @@ classifiers = [
 ]
 
 [project.scripts]
-ghostapi = "ghostapi.cli:main"
+apimirage = "apimirage.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/hahahahahahahahah6/ghostapi"
+Homepage = "https://github.com/hahahahahahahahah6/apimirage"
 
 [tool.setuptools.packages.find]
 where = ["src"]
